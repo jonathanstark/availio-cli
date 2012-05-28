@@ -1,0 +1,65 @@
+#!/usr/bin/php
+<?php
+try {
+	
+	// Trap for missing arg
+	if (count($argv) == 1) {
+		throw new Exception('domain missing', 1);
+	}
+	if (count($argv) > 3) {
+		throw new Exception('too many arguments', 1);
+	}
+	
+	// Grab the domain and any flag
+	if (count($argv) == 2) {
+		$domain = $argv[1];
+	}
+
+	if (count($argv) == 3) {
+		$flag = $argv[1];
+		$domain = $argv[2];
+	}
+
+	// Add .com to domain if no tld was given
+	if (stripos($domain, '.') === FALSE) {
+		$domain.= '.com';
+	}
+
+	// Handle flag, if need be
+	if (isset($flag)) {
+		throw new Exception('flags are not supported yet', 1);
+	} 
+
+	// Search for the domain to the API
+	$result = json_decode(lookup($domain));
+
+	// Check for errors
+	if (isset($result->response->error)) {
+		throw new Exception($result->response->error, 1);
+	}
+
+	// Grab first record (should only be 1)
+	$record = array_shift($result->response);
+
+	// Output the results
+	if($record->available) {
+		printf('%s is available', $record->domain);
+	} else {
+		printf('%s is taken', $record->domain);
+	}
+
+	// Append a line return
+	echo PHP_EOL;
+	
+} catch (Exception $e) {
+	echo $e->getMessage() . PHP_EOL;
+}
+
+// FUNCTIONS
+
+function lookup($domain) {
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, 'http://api.avail.io/' . $domain);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+	return curl_exec($ch);
+}
