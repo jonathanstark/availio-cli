@@ -60,10 +60,10 @@ try {
 function lookup($domain) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, 'http://api.avail.io/' . $domain);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array(
         'User-Agent: ' . getenv('TERM_PROGRAM') . ' v' . getenv('TERM_PROGRAM_VERSION'),
         'X-Requested-With: Availio CLI'
     ));
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     return curl_exec($ch);
 }
